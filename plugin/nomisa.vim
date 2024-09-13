@@ -1,43 +1,67 @@
-let g.nomisa_file_templates = ''
-let g.nomisa_extension_handlers = {}
-let g.nomisa_extension_handlers.svg = 'inkscape'
-let g.nomisa_extension_handlers.png = 'gimp'
-let g.nomisa_extension_handlers.jpg = 'gimp'
-let g.nomisa_extension_handlers.gif = 'gimp'
+let s:plugin_path = fnamemodify( fnamemodify(resolve(expand('<sfile>:p')), ':h') , ':h')
 
-" - create dirs if not exist
-" - always use current file as path starting point
+let g:nomisa_templates_path = s:plugin_path . '/nomisa_templates/'
+let g:nomisa_extension_handlers = {}
+let g:nomisa_extension_handlers.svg = 'inkscape'
+let g:nomisa_extension_handlers.png = 'gimp'
+let g:nomisa_extension_handlers.jpg = 'gimp'
+let g:nomisa_extension_handlers.gif = 'gimp'
+
+function s:getExtensionHandler(extension)
+  if has_key(g:nomisa_extension_handlers, a:extension)
+    return  g:nomisa_extension_handlers[a:extension]
+  endif
+  return ''
+endfunction
+
+function s:getTemplateFile(extension)
+
+  let tplfiles = split(glob(g:nomisa_templates_path .a:extension . "/*." . a:extension), '\n')
+  if len(tplfiles) == 0
+    echo "Nomisa: no template file found for " . a:extension
+    return ""
+  elseif len(tplfiles) == 1
+    return tplfiles[0]
+  else
+    return tplfiles[0]
+  end
+endfunction
 
 function! NewOrModifyInSpecializedApplication()
 
-  "find path undercursor
-  "let wordUnderCursor = expand("<cword>")
   let currentLine   = getline(".")
-
- " ![](images/test2.svg)
 
   if match(currentLine,"(") > 0
     let path = split(currentLine,"(")[1]
     if match(path, ")") > 0
+
+      let root_dir = expand('%:h')
       let path = split(path, ")" )[0]
 
-      let file_ext = fnamemodify(path, ':e')
-      echo file_ext
+      let file_path = root_dir . '/' . path
+      let file_dir = fnamemodify(file_path, ':h')
+      let file_ext = tolower(fnamemodify(path, ':e'))
 
-      if filereadable(path)
-        echo "SpecificFile exists"
-      else
-        echo "create file"
-        call system("cp tpl960x700.svg " . path )
+      if !filereadable(file_path)
+        if !isdirectory(file_dir)
+          call system("mkdir -p " . file_dir)
+        endif
+
+        let tpl_file = s:getTemplateFile(file_ext)
+        if( tpl_file != "")
+          call system("cp " . tpl_file  . " " . file_path )
+        endif
       endif
 
-      call system("inkscape " . path )
+      if filereadable(file_path)
+        let handler = s:getExtensionHandler(file_ext)
+        if handler != ''
+          call system( handler ." " . file_path )
+        endif
+      end
 
     end
   end
-
-
-  echo "Edit in inkscape" path
 endfunction
 
-
+command! Nomisa :call NewOrModifyInSpecializedApplication()
