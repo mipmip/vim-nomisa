@@ -25,6 +25,10 @@ other application.
 
 - currently only able to detect file paths inside `![]()` markdown image tags.
 
+## Demo
+
+https://github.com/user-attachments/assets/b5684adb-b5cb-474f-9663-e74d044f4a03
+
 ## Todo
 
 - make small video
