@@ -7,7 +7,7 @@ the file does not exist they can be created using templates.
 
 I make presentations in markdown (quarto with revealjs). Markdown is perfect
 for quick braindumps but sometimes I just want an empty canvas to tell my story
-visually. Placing my cursor on e.g. ![](images/about-nomisa.svg) and running
+visually. Placing my cursor on e.g. `![](images/about-nomisa.svg)` and running
 `:Nomisa` will open inkscape with this file. If it does not exist is offers me
 a list with svg-templates.
 
