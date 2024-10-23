@@ -27,6 +27,41 @@ function s:getTemplateFile(extension)
   end
 endfunction
 
+function! NewOrModifyInSpecializedApplicationVS()
+    let [line_start, column_start] = getpos("'<")[1:2]
+    let [line_end, column_end] = getpos("'>")[1:2]
+    let lines = getline(line_start, line_end)
+    if len(lines) == 0
+        return ''
+    endif
+    let lines[-1] = lines[-1][: column_end - 2]
+    let lines[0] = lines[0][column_start - 1:]
+    return join(lines, "\n")
+      let file_path = root_dir . '/' . path
+      let file_dir = fnamemodify(file_path, ':h')
+      let file_ext = tolower(fnamemodify(path, ':e'))
+
+      if !filereadable(file_path)
+        if !isdirectory(file_dir)
+          call system("mkdir -p " . file_dir)
+        endif
+
+        let tpl_file = s:getTemplateFile(file_ext)
+        if( tpl_file != "")
+          call system("cp " . tpl_file  . " " . file_path )
+        endif
+      endif
+
+      if filereadable(file_path)
+        let handler = s:getExtensionHandler(file_ext)
+        if handler != ''
+          call system( handler ." " . file_path )
+        endif
+      end
+
+
+endfunction
+
 function! NewOrModifyInSpecializedApplication()
 
   let currentLine   = getline(".")
